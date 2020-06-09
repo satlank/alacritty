@@ -21,6 +21,7 @@ uniform int backgroundPass;
 layout(location = 0, index = 0) out vec4 color;
 layout(location = 0, index = 1) out vec4 alphaMask;
 
+uniform float bgOpacity;
 uniform sampler2D mask;
 
 void main()
@@ -30,7 +31,7 @@ void main()
             discard;
 
         alphaMask = vec4(1.0);
-        color = vec4(bg.rgb, 1.0);
+        color = vec4(bg.rgb, 1.0) * bgOpacity;
     } else {
         if (colored != 0) {
             // Color glyphs, like emojis.

@@ -55,6 +55,10 @@ pub struct Config<T> {
     #[serde(default, deserialize_with = "failure_default")]
     background_opacity: Percentage,
 
+    /// Whether to apply background_opacity to all background colours.
+    #[serde(default, deserialize_with = "failure_default")]
+    keep_background_colors_opaque: DefaultTrueBool,
+
     /// Window configuration.
     #[serde(default, deserialize_with = "failure_default")]
     pub window: WindowConfig,
@@ -200,6 +204,17 @@ impl<T> Config<T> {
     #[inline]
     pub fn background_opacity(&self) -> f32 {
         self.background_opacity.0 as f32
+    }
+
+    /// Whether to keep non-default background colors opaque.
+    #[inline]
+    pub fn keep_background_colors_opaque(&self) -> bool {
+        self.keep_background_colors_opaque.0
+    }
+
+    #[inline]
+    pub fn set_keep_background_colors_opaque(&mut self, keep_background_colors_opaque: bool) {
+        self.keep_background_colors_opaque.0 = keep_background_colors_opaque;
     }
 }
 

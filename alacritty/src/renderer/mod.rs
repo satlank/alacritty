@@ -107,6 +107,8 @@ pub struct TextShaderProgram {
     ///
     /// Rendering is split into two passes; 1 for backgrounds, and one for text.
     u_background: GLint,
+
+    u_bg_opacity: GLint,
 }
 
 /// Rectangle drawing program.
@@ -776,6 +778,11 @@ impl QuadRenderer {
         unsafe {
             gl::UseProgram(self.program.id);
             self.program.set_term_uniforms(props);
+            self.program.set_bg_opacity(if config.keep_background_colors_opaque() {
+                1.0
+            } else {
+                config.background_opacity()
+            });
 
             gl::BindVertexArray(self.vao);
             gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, self.ebo);
@@ -1186,11 +1193,12 @@ impl TextShaderProgram {
         }
 
         // get uniform locations
-        let (projection, cell_dim, background) = unsafe {
+        let (projection, cell_dim, background, bg_opacity) = unsafe {
             (
                 gl::GetUniformLocation(program, cptr!(b"projection\0")),
                 gl::GetUniformLocation(program, cptr!(b"cellDim\0")),
                 gl::GetUniformLocation(program, cptr!(b"backgroundPass\0")),
+                gl::GetUniformLocation(program, cptr!(b"bgOpacity\0")),
             )
         };
 
@@ -1201,6 +1209,7 @@ impl TextShaderProgram {
             u_projection: projection,
             u_cell_dim: cell_dim,
             u_background: background,
+            u_bg_opacity: bg_opacity,
         };
 
         unsafe {
@@ -1234,6 +1243,12 @@ impl TextShaderProgram {
     fn set_term_uniforms(&self, props: &term::SizeInfo) {
         unsafe {
             gl::Uniform2f(self.u_cell_dim, props.cell_width, props.cell_height);
+        }
+    }
+
+    fn set_bg_opacity(&self, bg_opacity: f32) {
+        unsafe {
+            gl::Uniform1f(self.u_bg_opacity, bg_opacity);
         }
     }
 
